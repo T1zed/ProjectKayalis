@@ -21,7 +21,7 @@ void Player::Update() {
     }
 
     if (IsKeyDown(KEY_D)) {
-        rectangle.x += 0.02f;  
+        rectangle.x += 0.2f;  
     }
 
 
@@ -36,7 +36,7 @@ void Player::Update() {
 
 
     if (IsKeyDown(KEY_A)) {
-        rectangle.x -= 0.02f;  
+        rectangle.x -= 0.2f;  
     }
 
     if (IsKeyDown(KEY_S)) rectangle.y += 0.2f;    

@@ -1,21 +1,16 @@
-#include "raylib.h"
-#include "player.h"
+#include "game.h"
 
 int main() {
-    InitWindow(800, 600, "Platformer");
+    Game& game = Game::GetInstance(); 
 
+    game.Init();  
 
-    Player player(Rectangle{ 400, 300, 50, 50 });
-    player.Init(400, 300, 50, 50);  
     while (!WindowShouldClose()) {
-        player.Update();
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        player.Draw();
-        EndDrawing();
+        game.Update(); 
+        game.Draw();  
     }
-    CloseWindow();
 
+    game.Close(); 
     return 0;
 }
 
