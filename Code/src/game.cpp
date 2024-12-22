@@ -11,8 +11,8 @@ void Game::Init() {
 }
 
 void Game::InitPlayer() {
-    player = new Player(Rectangle{ 400, 300, 50, 50 });  
-    player->Init(400, 300, 50, 50);
+    player = new Player(Rectangle{ 400, 300, 250, 250 });  
+    player->Init(400, 300);
 }
 
 void Game::Update() {
