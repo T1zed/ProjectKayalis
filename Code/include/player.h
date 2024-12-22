@@ -15,6 +15,7 @@ public:
 private:
     Texture2D Right;  
     Texture2D AttackFrames[12];
+    Texture2D Attack2Frames[10];
     Texture2D IdleFrames[6];  
     Texture2D runframes[8];
 
@@ -27,6 +28,7 @@ private:
     int currentAtkFrame = 0;
 
     const float frameDuration = 0.1f;  
+    bool isDashAttacking = false;
     bool isAttacking = false;
     bool isRunningR = false;
     bool isRunningL = false;
