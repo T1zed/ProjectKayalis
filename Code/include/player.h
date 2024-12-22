@@ -14,14 +14,20 @@ public:
 
 private:
     Texture2D Right;  
-    Texture2D IdleFrames[5];  
-    Texture2D runframes[7];
+    Texture2D AttackFrames[12];
+    Texture2D IdleFrames[6];  
+    Texture2D runframes[8];
+
     Vector2 velocity;
     Direction lastDirection = RIGHT;
     float elapsedTime = 0.0f; 
+
     int currentIdleFrame = 0;     
     int currentRunFrame = 0;
-    const float frameDuration = 0.4f;  
+    int currentAtkFrame = 0;
+
+    const float frameDuration = 0.1f;  
+    bool isAttacking = false;
     bool isRunningR = false;
     bool isRunningL = false;
     bool isMooving = false;
