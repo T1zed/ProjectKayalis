@@ -3,7 +3,7 @@
 
 #include "raylib.h"
 #include "player.h"
-
+#include "vector"
 class Game {
 public:
     static Game& GetInstance(); 
@@ -20,8 +20,9 @@ private:
     ~Game() = default; 
 
     Player* player = nullptr; 
-
+    std::vector<Rectangle> grounds;
     void InitPlayer();
+    void InitGrounds();
 };
 
 #endif

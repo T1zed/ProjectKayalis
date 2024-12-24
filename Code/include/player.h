@@ -11,7 +11,9 @@ public:
     void Init(float x, float y);
     void Update();
     void Draw();
-
+    void OnGroundCollision();
+    void ResetOnGround() { isOnGround = false; }
+    bool IsOnGround() const { return isOnGround; }
 private:
     Texture2D Right;  
     Texture2D AttackFrames[12];
@@ -27,12 +29,16 @@ private:
     int currentRunFrame = 0;
     int currentAtkFrame = 0;
 
+    float verticalspeed= 0.0f;
+    bool isOnGround = false;
+
     const float frameDuration = 0.1f;  
     bool isDashAttacking = false;
     bool isAttacking = false;
     bool isRunningR = false;
     bool isRunningL = false;
     bool isMooving = false;
+
 };
 
 

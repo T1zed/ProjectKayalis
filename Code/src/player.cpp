@@ -50,6 +50,14 @@ void Player::Init(float x, float y) {
 }
 
 void Player::Update() {
+    if (!isOnGround) {
+        verticalspeed += 0.02f; 
+        rectangle.y += verticalspeed;
+    }
+    else {
+        verticalspeed = 0.0f;  
+    }
+
     if (isAttacking || isDashAttacking) {
         elapsedTime += GetFrameTime();
         if (elapsedTime >= frameDuration) {
@@ -133,7 +141,7 @@ void Player::Draw() {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)Right.width, (float)Right.height };
     Vector2 origin = { 0.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
-
+    DrawRectangleRec(rectangle, RED);
     if (isDashAttacking) {
         
         if (lastDirection == LEFT) {
@@ -174,6 +182,11 @@ void Player::Draw() {
         }
         DrawTexturePro(IdleFrames[currentIdleFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
+}
+
+void Player::OnGroundCollision() {
+    verticalspeed = -0.02f; 
+    isOnGround = true;
 }
 
 

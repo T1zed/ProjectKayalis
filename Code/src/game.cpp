@@ -8,22 +8,40 @@ Game& Game::GetInstance() {
 void Game::Init() {
     InitWindow(2000, 1000, "Platformer");
     InitPlayer(); 
+    InitGrounds();
 }
 
 void Game::InitPlayer() {
-    player = new Player(Rectangle{ 400, 300, 250, 250 });  
+    player = new Player(Rectangle{ 400, 300, 200, 200 });  
     player->Init(400, 300);
 }
+void Game::InitGrounds() {
 
+    grounds.push_back({ 100, 800, 500, 50 });  
+
+}
 void Game::Update() {
-    if (player != nullptr) {
-        player->Update();
+    if (player == nullptr) {
+        return;
+    }
+    player->ResetOnGround();
+    player->Update();
+
+    for (const auto& ground : grounds) {
+        if (CheckCollisionRecs(player->getRectangle(), ground)) {
+
+            player->OnGroundCollision();
+            
+        }
     }
 }
 
 void Game::Draw() {
     BeginDrawing();
     ClearBackground(RAYWHITE);
+    for (const auto& ground : grounds) {
+        DrawRectangleRec(ground, DARKGRAY); 
+    }
     if (player != nullptr) {
         player->Draw(); 
     }
