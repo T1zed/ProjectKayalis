@@ -30,17 +30,23 @@ private:
     int currentIdleFrame = 0;     
     int currentRunFrame = 0;
     int currentAtkFrame = 0;
+    int currentAtk2Frame = 0;
     int currentJumpFrame = 0;
+
+    float barProgress = 1.0f;
 
     float verticalspeed= 0.0f;
     bool isOnGround = false;
     bool isJumping = false;
+    bool isDashing = false;
     const float frameDuration = 0.1f;  
     bool isDashAttacking = false;
     bool isAttacking = false;
     bool isRunningR = false;
     bool isRunningL = false;
     bool isMooving = false;
+    bool CanDash = false;
+    bool Playerdash = true;
 
 };
 

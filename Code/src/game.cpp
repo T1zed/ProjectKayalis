@@ -18,30 +18,39 @@ void Game::InitPlayer() {
 }
 void Game::InitGrounds() {
 
-    grounds.push_back({ 100, 800, 500, 50 });  
+    grounds.push_back({ 100, 800, 2000, 50 });  
+
+    grounds.push_back({ 700, 900, 50, 50 });
+
+    grounds.push_back({ 700, 450, 50, 50 });
 
 }
+
+bool Game::CheckCollisionX(const Rectangle& rect1, const Rectangle& rect2) {
+    return (rect1.x + rect1.width > rect2.x && rect1.x < rect2.x + rect2.width);
+}
+
+
 void Game::Update() {
     if (player == nullptr) {
         return;
     }
 
     player->Update();
-
-    bool isOnGroundNow = player->IsOnGround();
-
+    Rectangle redRectangle = { player->getRectangle().x, player->getRectangle().y + 20,
+                               player->getRectangle().width - 150, player->getRectangle().height - 20 };
+    bool isOnGroundNow = false; 
     for (const auto& ground : grounds) {
-        if (CheckCollisionRecs(player->getRectangle(), ground)) {
-            isOnGroundNow = true;
-            player->OnGroundCollision(ground);
-        }
-        else
         {
-            isOnGroundNow = false;
+            if (CheckCollisionRecs(redRectangle, ground)) {
+                if (redRectangle.y + redRectangle.width <= ground.y) {
+                    isOnGroundNow = true;
+                    player->OnGroundCollision(ground);
+                    break;
+                }
+            }
         }
     }
-
-
     if (isOnGroundNow) {
         if (!player->IsOnGround()) {
             player->setOnGround(true);
@@ -53,6 +62,7 @@ void Game::Update() {
         }
     }
 }
+
 
 void Game::Draw() {
     BeginDrawing();

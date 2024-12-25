@@ -14,7 +14,7 @@ public:
     void Update();
     void Draw();
     void Close();
-
+    bool CheckCollisionX(const Rectangle& rect1, const Rectangle& rect2);
 private:
     Game() = default; 
     ~Game() = default; 

@@ -50,6 +50,8 @@ Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 
     jumpframes[6] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
     jumpframes[7] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_2.png");
     jumpframes[8] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
+
+
     Right = IdleFrames[0];  
 }
 
@@ -57,13 +59,22 @@ Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 
 void Player::Init(float x, float y,float w, float h) {
     rectangle.x = x;
     rectangle.y = y;
-    rectangle.width = w-100;
+    rectangle.width = w;
     rectangle.height = h;
 }
 
 void Player::Update() {
+    if (barProgress >= 1.0f) {
+        barProgress = 1.0f;  
+        Playerdash = true;    
+    }
 
+    if (barProgress <= 0.0f) {
+        barProgress = 0.0f;  
+        Playerdash = false;  
+    }
 
+    
 
     if (IsKeyDown(KEY_W) && isOnGround) {
         verticalspeed = -10.0f;  
@@ -106,7 +117,8 @@ void Player::Update() {
 
 
 
-
+    if (!isAttacking && !isDashAttacking && !isJumping)
+        barProgress += 0.0008f;
 
 
 
@@ -117,8 +129,8 @@ void Player::Update() {
         if (elapsedTime >= frameDuration) {
             elapsedTime = 0.0f;
             if (isDashAttacking) {
-                currentAtkFrame = (currentAtkFrame + 1) % 10;  
-                if (currentAtkFrame == 0) {
+                currentAtk2Frame = (currentAtk2Frame + 1) % 10;  
+                if (currentAtk2Frame == 0) {
                     isDashAttacking = false;
                 }
             }
@@ -132,8 +144,15 @@ void Player::Update() {
     }
     else {
         
-        if (IsKeyDown(KEY_D)) {
+        if (IsKeyDown(KEY_D) && !isRunningL) {
             rectangle.x += 2.0f;
+            if (isOnGround  && Playerdash) {
+                CanDash = true;
+            }
+            else
+            {
+                CanDash = false;
+            }
             isMooving = true;
             isRunningR = true;
             isRunningL = false;
@@ -143,22 +162,40 @@ void Player::Update() {
                 elapsedTime = 0.0f;
                 currentRunFrame = (currentRunFrame + 1) % 8;
             }
+            if (IsKeyDown(KEY_KP_5)&& !isJumping && CanDash && Playerdash) {
+                isDashing = true;
+                rectangle.x += 8;
+                barProgress -= 0.008f;
+            }
         }
         else if (IsKeyReleased(KEY_D)) {
             isRunningR = false;
             isMooving = false;
         }
 
-        if (IsKeyDown(KEY_A)) {
+        if (IsKeyDown(KEY_A) && !isRunningR) {
             rectangle.x -= 2.0f;
+            if (isOnGround && Playerdash) {
+                CanDash = true;
+            }
+            else
+            {
+                CanDash = false;
+            }
             isMooving = true;
             isRunningL = true;
             isRunningR = false;
+            isDashing = false;
             lastDirection = LEFT;
             elapsedTime += GetFrameTime();
             if (elapsedTime >= frameDuration) {
                 elapsedTime = 0.0f;
                 currentRunFrame = (currentRunFrame + 1) % 8;
+            }
+            if (IsKeyDown(KEY_KP_5) && !isJumping && CanDash) {
+                isDashing = true;
+                rectangle.x -= 8;
+                barProgress -= 0.008f;
             }
         }
         else if (IsKeyReleased(KEY_A)) {
@@ -174,14 +211,14 @@ void Player::Update() {
             }
         }
 
-        if (isMooving && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (isMooving && IsKeyPressed(KEY_KP_4)) {
             isDashAttacking = true;  
             currentAtkFrame = 0;
             elapsedTime = 0.0f;
             isMooving = false;  
             
         }
-        else if (!isMooving && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        else if (!isMooving && IsKeyPressed(KEY_KP_4)) {
             isAttacking = true;  
             currentAtkFrame = 0;
             elapsedTime = 0.0f;
@@ -195,18 +232,27 @@ void Player::Draw() {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)Right.width, (float)Right.height };
     Vector2 origin = { 50.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
-    Rectangle redRectangle = { rectangle.x, rectangle.y+20, rectangle.width -120, rectangle.height-20 }; 
+    Rectangle redRectangle = { rectangle.x, rectangle.y+20, rectangle.width -150, rectangle.height-20 }; 
+    int barWidth = 800;  
+    int barHeight = 50;  
+    int barX = 200;       
+    int barY = 0;       
 
-    DrawRectangleRec(redRectangle, RED);
+
+    DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
+
+
+    DrawRectangle(barX, barY, (int)(barWidth * barProgress), barHeight, BLUE);
+
     if (isDashAttacking && !isJumping) {
         
         if (lastDirection == LEFT) {
-            sourceRec.width = -Attack2Frames[currentAtkFrame].width;
+            sourceRec.width = -Attack2Frames[currentAtk2Frame].width;
         }
         else {
-            sourceRec.width = (float)Attack2Frames[currentAtkFrame].width;
+            sourceRec.width = (float)Attack2Frames[currentAtk2Frame].width;
         }
-        DrawTexturePro(Attack2Frames[currentAtkFrame], sourceRec, destRec, origin, 0.0f, WHITE);
+        DrawTexturePro(Attack2Frames[currentAtk2Frame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
     else if (isAttacking && !isJumping) {
         
@@ -218,12 +264,12 @@ void Player::Draw() {
         }
         DrawTexturePro(AttackFrames[currentAtkFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if (isRunningR && !isJumping) {
-        
+    else if (isRunningR && !isJumping && !isRunningL) {
         sourceRec.width = (float)runframes[currentRunFrame].width;
         DrawTexturePro(runframes[currentRunFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if (isRunningL && !isJumping) {
+    
+    else if (isRunningL && !isJumping && !isRunningR) {
         
         sourceRec.width = -runframes[currentRunFrame].width;
         DrawTexturePro(runframes[currentRunFrame], sourceRec, destRec, origin, 0.0f, WHITE);
