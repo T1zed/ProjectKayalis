@@ -8,7 +8,7 @@ enum Direction {
 class Player : public Entity {
 public:
     Player(const Rectangle& rectangle);
-    void Init(float x, float y);
+    void Init(float x, float y, float w, float h);
     void Update();
     void Draw();
     void OnGroundCollision(const Rectangle& ground);

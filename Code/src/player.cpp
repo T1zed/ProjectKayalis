@@ -54,14 +54,18 @@ Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 
 }
 
 
-void Player::Init(float x, float y) {
+void Player::Init(float x, float y,float w, float h) {
     rectangle.x = x;
     rectangle.y = y;
+    rectangle.width = w-100;
+    rectangle.height = h;
 }
 
 void Player::Update() {
 
-    if (IsKeyPressed(KEY_W) && isOnGround) {
+
+
+    if (IsKeyDown(KEY_W) && isOnGround) {
         verticalspeed = -10.0f;  
         isOnGround = false;      
         isJumping = true;        
@@ -162,9 +166,6 @@ void Player::Update() {
             isMooving = false;
         }
 
-
-
-
         if (!isMooving && !isJumping) {
             elapsedTime += GetFrameTime();
             if (elapsedTime >= frameDuration) {
@@ -172,9 +173,6 @@ void Player::Update() {
                 currentIdleFrame = (currentIdleFrame + 1) % 6;
             }
         }
-
-
-
 
         if (isMooving && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             isDashAttacking = true;  
@@ -195,9 +193,11 @@ void Player::Update() {
 
 void Player::Draw() {
     Rectangle sourceRec = { 0.0f, 0.0f, (float)Right.width, (float)Right.height };
-    Vector2 origin = { 0.0f, 0.0f };
+    Vector2 origin = { 50.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
-    DrawRectangleRec(rectangle, RED);
+    Rectangle redRectangle = { rectangle.x, rectangle.y+20, rectangle.width -120, rectangle.height-20 }; 
+
+    DrawRectangleRec(redRectangle, RED);
     if (isDashAttacking && !isJumping) {
         
         if (lastDirection == LEFT) {

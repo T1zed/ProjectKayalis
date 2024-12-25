@@ -13,8 +13,8 @@ void Game::Init() {
 }
 
 void Game::InitPlayer() {
-    player = new Player(Rectangle{ 400, 300, 200, 200 });  
-    player->Init(400, 300);
+    player = new Player(Rectangle{ 400, 300, 300, 200 });  
+    player->Init(400, 300, 300 ,200);
 }
 void Game::InitGrounds() {
 
