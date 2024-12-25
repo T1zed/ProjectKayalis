@@ -1,5 +1,5 @@
 #include "player.h"
-
+#include "iostream"
 Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 0.0f } {
     IdleFrames[0] = LoadTexture("Assets/Warrior/Individual Sprite/Idle/Warrior_Idle_1.png");
     IdleFrames[1] = LoadTexture("Assets/Warrior/Individual Sprite/Idle/Warrior_Idle_2.png");
@@ -50,6 +50,13 @@ void Player::Init(float x, float y) {
 }
 
 void Player::Update() {
+
+    if (IsKeyPressed(KEY_SPACE) && isOnGround) {
+        isOnGround = false;
+        verticalspeed = -6.0f;  
+          
+    }
+
     if (!isOnGround) {
         verticalspeed += 0.02f; 
         rectangle.y += verticalspeed;
@@ -184,9 +191,12 @@ void Player::Draw() {
     }
 }
 
-void Player::OnGroundCollision() {
-    verticalspeed = -0.02f; 
-    isOnGround = true;
+void Player::OnGroundCollision(const Rectangle& ground) {
+
+    rectangle.y = ground.y - rectangle.height; 
+    verticalspeed = 0.0f;  
+    isOnGround = true;     
 }
+
 
 

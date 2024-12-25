@@ -11,7 +11,7 @@ public:
     void Init(float x, float y);
     void Update();
     void Draw();
-    void OnGroundCollision();
+    void OnGroundCollision(const Rectangle& ground);
     void ResetOnGround() { isOnGround = false; }
     bool IsOnGround() const { return isOnGround; }
 private:

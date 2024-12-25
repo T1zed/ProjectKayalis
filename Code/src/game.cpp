@@ -24,13 +24,13 @@ void Game::Update() {
     if (player == nullptr) {
         return;
     }
-    player->ResetOnGround();
+
     player->Update();
 
     for (const auto& ground : grounds) {
         if (CheckCollisionRecs(player->getRectangle(), ground)) {
 
-            player->OnGroundCollision();
+            player->OnGroundCollision(ground);
             
         }
     }
