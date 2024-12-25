@@ -7,6 +7,7 @@ Game& Game::GetInstance() {
 
 void Game::Init() {
     InitWindow(2000, 1000, "Platformer");
+    SetTargetFPS(100);
     InitPlayer(); 
     InitGrounds();
 }

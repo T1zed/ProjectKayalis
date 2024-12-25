@@ -40,6 +40,16 @@ Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 
     Attack2Frames[7] = LoadTexture("Assets/Warrior/Individual Sprite/Dash-Attack_noDust/Warrior_Dash-Attack_8.png");
     Attack2Frames[8] = LoadTexture("Assets/Warrior/Individual Sprite/Dash-Attack_noDust/Warrior_Dash-Attack_9.png");
     Attack2Frames[9] = LoadTexture("Assets/Warrior/Individual Sprite/Dash-Attack_noDust/Warrior_Dash-Attack_10.png");
+
+    jumpframes[0] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_1.png");
+    jumpframes[1] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_2.png");
+    jumpframes[2] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
+    jumpframes[3] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_2.png");
+    jumpframes[4] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
+    jumpframes[5] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_2.png");
+    jumpframes[6] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
+    jumpframes[7] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_2.png");
+    jumpframes[8] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
     Right = IdleFrames[0];  
 }
 
@@ -53,11 +63,32 @@ void Player::Update() {
 
     if (IsKeyPressed(KEY_SPACE) && isOnGround) {
         isOnGround = false;
-        verticalspeed = -6.0f;  
-          
+        isJumping = true;  
+        isMooving = true;
+
+        verticalspeed = -4.0f;
+        currentJumpFrame = 0;  
+        elapsedTime = 0.0f;
+    }
+
+    if (isJumping) {
+        elapsedTime += GetFrameTime();
+        if (elapsedTime >= frameDuration) {
+            elapsedTime = 0.0f;
+            currentJumpFrame = (currentJumpFrame + 1) % 9;  
+        }
+    }
+
+    if (IsOnGround()) {
+        isOnGround = true;
+        isJumping = false;  
+        isMooving = false;
+        verticalspeed = 0.0f; 
+        currentJumpFrame = 0;  
     }
 
     if (!isOnGround) {
+        
         verticalspeed += 0.02f; 
         rectangle.y += verticalspeed;
     }
@@ -119,13 +150,19 @@ void Player::Update() {
             isMooving = false;
         }
 
-        if (!isMooving) {
+
+
+
+        if (!isMooving && !isJumping) {
             elapsedTime += GetFrameTime();
             if (elapsedTime >= frameDuration) {
                 elapsedTime = 0.0f;
                 currentIdleFrame = (currentIdleFrame + 1) % 6;
             }
         }
+
+
+
 
         if (isMooving && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             isDashAttacking = true;  
@@ -149,7 +186,7 @@ void Player::Draw() {
     Vector2 origin = { 0.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
     DrawRectangleRec(rectangle, RED);
-    if (isDashAttacking) {
+    if (isDashAttacking && !isJumping) {
         
         if (lastDirection == LEFT) {
             sourceRec.width = -Attack2Frames[currentAtkFrame].width;
@@ -159,7 +196,7 @@ void Player::Draw() {
         }
         DrawTexturePro(Attack2Frames[currentAtkFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if (isAttacking) {
+    else if (isAttacking && !isJumping) {
         
         if (lastDirection == LEFT) {
             sourceRec.width = -AttackFrames[currentAtkFrame].width;
@@ -169,18 +206,18 @@ void Player::Draw() {
         }
         DrawTexturePro(AttackFrames[currentAtkFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if (isRunningR) {
+    else if (isRunningR && !isJumping) {
         
         sourceRec.width = (float)runframes[currentRunFrame].width;
         DrawTexturePro(runframes[currentRunFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if (isRunningL) {
+    else if (isRunningL && !isJumping) {
         
         sourceRec.width = -runframes[currentRunFrame].width;
         DrawTexturePro(runframes[currentRunFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else {
-        
+    else if(!isMooving && !isJumping){
+
         if (lastDirection == LEFT) {
             sourceRec.width = -IdleFrames[currentIdleFrame].width;
         }
@@ -189,6 +226,17 @@ void Player::Draw() {
         }
         DrawTexturePro(IdleFrames[currentIdleFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
+    else if (isJumping) {
+        if (lastDirection == LEFT) {
+            sourceRec.width = -jumpframes[currentJumpFrame].width;  
+        }
+        else {
+            sourceRec.width = (float)jumpframes[currentJumpFrame].width;
+        }
+        DrawTexturePro(jumpframes[currentJumpFrame], sourceRec, destRec, origin, 0.0f, WHITE);
+    }
+    
+    
 }
 
 void Player::OnGroundCollision(const Rectangle& ground) {
