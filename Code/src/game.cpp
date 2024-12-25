@@ -28,11 +28,28 @@ void Game::Update() {
 
     player->Update();
 
+    bool isOnGroundNow = player->IsOnGround();
+
     for (const auto& ground : grounds) {
         if (CheckCollisionRecs(player->getRectangle(), ground)) {
-
+            isOnGroundNow = true;
             player->OnGroundCollision(ground);
-            
+        }
+        else
+        {
+            isOnGroundNow = false;
+        }
+    }
+
+
+    if (isOnGroundNow) {
+        if (!player->IsOnGround()) {
+            player->setOnGround(true);
+        }
+    }
+    else {
+        if (player->IsOnGround()) {
+            player->setOnGround(false);
         }
     }
 }

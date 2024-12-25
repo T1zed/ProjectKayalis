@@ -14,6 +14,7 @@ public:
     void OnGroundCollision(const Rectangle& ground);
     void ResetOnGround() { isOnGround = false; }
     bool IsOnGround() const { return isOnGround; }
+    void setOnGround(bool state);
 private:
     Texture2D Right;  
     Texture2D AttackFrames[12];
@@ -21,7 +22,6 @@ private:
     Texture2D IdleFrames[6];  
     Texture2D runframes[8];
     Texture2D jumpframes[9];
-    Texture2D landframes[3];
 
     Vector2 velocity;
     Direction lastDirection = RIGHT;

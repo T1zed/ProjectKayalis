@@ -61,40 +61,52 @@ void Player::Init(float x, float y) {
 
 void Player::Update() {
 
-    if (IsKeyPressed(KEY_SPACE) && isOnGround) {
-        isOnGround = false;
-        isJumping = true;  
-        isMooving = true;
+    if (IsKeyPressed(KEY_W) && isOnGround) {
+        verticalspeed = -10.0f;  
+        isOnGround = false;      
+        isJumping = true;        
+        isMooving = true;        
 
-        verticalspeed = -4.0f;
-        currentJumpFrame = 0;  
-        elapsedTime = 0.0f;
+        currentJumpFrame = 0;    
+        elapsedTime = 0.0f;     
     }
 
+
     if (isJumping) {
-        elapsedTime += GetFrameTime();
+        elapsedTime += GetFrameTime();  
         if (elapsedTime >= frameDuration) {
             elapsedTime = 0.0f;
             currentJumpFrame = (currentJumpFrame + 1) % 9;  
         }
     }
 
-    if (IsOnGround()) {
-        isOnGround = true;
+    if (isOnGround) {
         isJumping = false;  
-        isMooving = false;
-        verticalspeed = 0.0f; 
+        isMooving = false;  
+        verticalspeed = 0.0f;  
         currentJumpFrame = 0;  
     }
+    else if (!isJumping || !isOnGround) {
+        verticalspeed += 0.2f;  
+        rectangle.y += verticalspeed;  
+        if (IsKeyDown(KEY_S)) {
+            verticalspeed += 0.4f;
+        }
 
-    if (!isOnGround) {
-        
-        verticalspeed += 0.02f; 
-        rectangle.y += verticalspeed;
     }
-    else {
-        verticalspeed = 0.0f;  
+
+    if (isOnGround) {
+        verticalspeed = 0.0f;
     }
+
+
+
+
+
+
+
+
+
 
     if (isAttacking || isDashAttacking) {
         elapsedTime += GetFrameTime();
@@ -117,7 +129,7 @@ void Player::Update() {
     else {
         
         if (IsKeyDown(KEY_D)) {
-            rectangle.x += 0.2f;
+            rectangle.x += 2.0f;
             isMooving = true;
             isRunningR = true;
             isRunningL = false;
@@ -134,7 +146,7 @@ void Player::Update() {
         }
 
         if (IsKeyDown(KEY_A)) {
-            rectangle.x -= 0.2f;
+            rectangle.x -= 2.0f;
             isMooving = true;
             isRunningL = true;
             isRunningR = false;
@@ -234,9 +246,7 @@ void Player::Draw() {
             sourceRec.width = (float)jumpframes[currentJumpFrame].width;
         }
         DrawTexturePro(jumpframes[currentJumpFrame], sourceRec, destRec, origin, 0.0f, WHITE);
-    }
-    
-    
+    }    
 }
 
 void Player::OnGroundCollision(const Rectangle& ground) {
@@ -246,5 +256,8 @@ void Player::OnGroundCollision(const Rectangle& ground) {
     isOnGround = true;     
 }
 
+void Player::setOnGround(bool state) {
+    isOnGround = state;  
+}
 
 
