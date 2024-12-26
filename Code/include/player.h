@@ -15,6 +15,12 @@ public:
     void ResetOnGround() { isOnGround = false; }
     bool IsOnGround() const { return isOnGround; }
     void setOnGround(bool state);
+
+
+    bool IsOnWall() const { return isOnWall; }
+    void setOnWall(bool state);
+
+    void OnWallCollision(const Rectangle& wall);
 private:
     Texture2D Right;  
     Texture2D AttackFrames[12];
@@ -39,6 +45,7 @@ private:
     bool isOnGround = false;
     bool isJumping = false;
     bool isDashing = false;
+    bool isOnWall = false; 
     const float frameDuration = 0.1f;  
     bool isDashAttacking = false;
     bool isAttacking = false;

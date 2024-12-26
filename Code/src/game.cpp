@@ -10,6 +10,7 @@ void Game::Init() {
     SetTargetFPS(100);
     InitPlayer(); 
     InitGrounds();
+    InitWalls();
 }
 
 void Game::InitPlayer() {
@@ -25,9 +26,18 @@ void Game::InitGrounds() {
     grounds.push_back({ 700, 450, 50, 50 });
 
 }
+void Game::InitWalls() {
+
+    walls.push_back({ 800, 100,200,400 });
+
+}
 
 bool Game::CheckCollisionX(const Rectangle& rect1, const Rectangle& rect2) {
     return (rect1.x + rect1.width > rect2.x && rect1.x < rect2.x + rect2.width);
+}
+
+bool Game::CheckCollisionY(const Rectangle& rect1, const Rectangle& rect2) {
+    return (rect1.y + rect1.height > rect2.y && rect1.y < rect2.y + rect2.height);
 }
 
 
@@ -39,7 +49,9 @@ void Game::Update() {
     player->Update();
     Rectangle redRectangle = { player->getRectangle().x, player->getRectangle().y + 20,
                                player->getRectangle().width - 150, player->getRectangle().height - 20 };
+
     bool isOnGroundNow = false; 
+
     for (const auto& ground : grounds) {
         {
             if (CheckCollisionRecs(redRectangle, ground)) {
@@ -51,6 +63,30 @@ void Game::Update() {
             }
         }
     }
+
+    bool isOnWallNow = false;
+
+    for (const auto& wall : walls) {
+        if (CheckCollisionY(redRectangle, wall)) {
+            if (redRectangle.x + redRectangle.width > wall.x && redRectangle.x < wall.x + wall.width) {  
+                isOnWallNow = true;
+                player->OnWallCollision(wall);  
+                break;
+            }
+        }
+    }
+
+    if (isOnWallNow) {
+        if (!player->IsOnWall()) {  
+            player->setOnWall(true);
+        }
+    }
+    else {
+        if (player->IsOnWall()) {
+            player->setOnWall(false);
+        }
+    }
+
     if (isOnGroundNow) {
         if (!player->IsOnGround()) {
             player->setOnGround(true);
@@ -70,6 +106,11 @@ void Game::Draw() {
     for (const auto& ground : grounds) {
         DrawRectangleRec(ground, DARKGRAY); 
     }
+
+    for (const auto& walls : walls) {
+        DrawRectangleRec(walls, PURPLE);
+    }
+
     if (player != nullptr) {
         player->Draw(); 
     }

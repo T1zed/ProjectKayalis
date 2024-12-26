@@ -15,14 +15,17 @@ public:
     void Draw();
     void Close();
     bool CheckCollisionX(const Rectangle& rect1, const Rectangle& rect2);
+    bool CheckCollisionY(const Rectangle& rect1, const Rectangle& rect2);
 private:
     Game() = default; 
     ~Game() = default; 
 
     Player* player = nullptr; 
     std::vector<Rectangle> grounds;
+    std::vector<Rectangle> walls;
     void InitPlayer();
     void InitGrounds();
+    void InitWalls();
 };
 
 #endif

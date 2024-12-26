@@ -76,7 +76,7 @@ void Player::Update() {
 
     
 
-    if (IsKeyDown(KEY_W) && isOnGround) {
+    if (IsKeyDown(KEY_W) && isOnGround && !isOnWall) {
         verticalspeed = -10.0f;  
         isOnGround = false;      
         isJumping = true;        
@@ -238,11 +238,18 @@ void Player::Draw() {
     int barX = 200;       
     int barY = 0;       
 
-
+    
     DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
+    DrawRectangleRec(redRectangle, RED);
 
-
-    DrawRectangle(barX, barY, (int)(barWidth * barProgress), barHeight, BLUE);
+    if (Playerdash) {
+        DrawRectangle(barX, barY, (int)(barWidth * barProgress), barHeight, BLUE);
+    }
+    else
+    {
+        DrawRectangle(barX, barY, (int)(barWidth * barProgress), barHeight, RED);
+    }
+    
 
     if (isDashAttacking && !isJumping) {
         
@@ -302,8 +309,47 @@ void Player::OnGroundCollision(const Rectangle& ground) {
     isOnGround = true;     
 }
 
+void Player::OnWallCollision(const Rectangle& wall) {
+
+
+    verticalspeed = 0.0f;
+
+    float overlapLeft = (rectangle.x + rectangle.width) - wall.x;  
+    float overlapRight = (wall.x + wall.width) - rectangle.x;      
+
+
+    if (overlapLeft > 0 && rectangle.x < wall.x) {
+
+        rectangle.x = wall.x - rectangle.width/2;
+        if (IsKeyPressed(KEY_W) && Playerdash) {
+            rectangle.y -= 100.f;
+            barProgress -= 0.2f;
+        }
+
+    }
+
+    else if (overlapRight > 0 && rectangle.x > wall.x) {
+
+        rectangle.x = wall.x + wall.width;
+        if (IsKeyPressed(KEY_W) && Playerdash) {
+            rectangle.y -= 100.f;
+            barProgress -= 0.2f;
+        }
+    }
+    isOnWall = true;
+}
+
+
+
+
+
+
 void Player::setOnGround(bool state) {
     isOnGround = state;  
+}
+
+void Player::setOnWall(bool state) {
+    isOnWall = state;
 }
 
 
