@@ -21,6 +21,7 @@ public:
     void setOnWall(bool state);
 
     void OnWallCollision(const Rectangle& wall);
+    void OnspikesCollision(const Rectangle& spikes);
 private:
     Texture2D Right;  
     Texture2D AttackFrames[12];
@@ -28,6 +29,7 @@ private:
     Texture2D IdleFrames[6];  
     Texture2D runframes[8];
     Texture2D jumpframes[9];
+    Texture2D Wallframes[3];
 
     Vector2 velocity;
     Direction lastDirection = RIGHT;
@@ -38,8 +40,11 @@ private:
     int currentAtkFrame = 0;
     int currentAtk2Frame = 0;
     int currentJumpFrame = 0;
+    int currentWallFrame = 0;
 
-    float barProgress = 1.0f;
+
+    float staminaProgress = 1.0f;
+    float PlayerLife = 100.0f;
 
     float verticalspeed= 0.0f;
     bool isOnGround = false;
@@ -52,6 +57,7 @@ private:
     bool isRunningR = false;
     bool isRunningL = false;
     bool isMooving = false;
+    bool isOnSpike = false;
     bool CanDash = false;
     bool Playerdash = true;
 

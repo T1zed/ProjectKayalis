@@ -51,7 +51,9 @@ Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 
     jumpframes[7] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_2.png");
     jumpframes[8] = LoadTexture("Assets/Warrior/Individual Sprite/Jump/Warrior_Jump_3.png");
 
-
+    Wallframes[0] = LoadTexture("Assets/Warrior/Individual Sprite/WallSlide/Warrior_WallSlide_1.png");
+    Wallframes[1] = LoadTexture("Assets/Warrior/Individual Sprite/WallSlide/Warrior_WallSlide_2.png");
+    Wallframes[2] = LoadTexture("Assets/Warrior/Individual Sprite/WallSlide/Warrior_WallSlide_3.png");
     Right = IdleFrames[0];  
 }
 
@@ -64,13 +66,13 @@ void Player::Init(float x, float y,float w, float h) {
 }
 
 void Player::Update() {
-    if (barProgress >= 1.0f) {
-        barProgress = 1.0f;  
+    if (staminaProgress >= 1.0f) {
+        staminaProgress = 1.0f;  
         Playerdash = true;    
     }
 
-    if (barProgress <= 0.0f) {
-        barProgress = 0.0f;  
+    if (staminaProgress <= 0.0f) {
+        staminaProgress = 0.0f;  
         Playerdash = false;  
     }
 
@@ -114,15 +116,8 @@ void Player::Update() {
         verticalspeed = 0.0f;
     }
 
-
-
-
     if (!isAttacking && !isDashAttacking && !isJumping)
-        barProgress += 0.0008f;
-
-
-
-
+        staminaProgress += 0.0008f;
 
     if (isAttacking || isDashAttacking) {
         elapsedTime += GetFrameTime();
@@ -165,7 +160,7 @@ void Player::Update() {
             if (IsKeyDown(KEY_KP_5)&& !isJumping && CanDash && Playerdash) {
                 isDashing = true;
                 rectangle.x += 8;
-                barProgress -= 0.008f;
+                staminaProgress -= 0.008f;
             }
         }
         else if (IsKeyReleased(KEY_D)) {
@@ -195,7 +190,7 @@ void Player::Update() {
             if (IsKeyDown(KEY_KP_5) && !isJumping && CanDash) {
                 isDashing = true;
                 rectangle.x -= 8;
-                barProgress -= 0.008f;
+                staminaProgress -= 0.008f;
             }
         }
         else if (IsKeyReleased(KEY_A)) {
@@ -211,14 +206,14 @@ void Player::Update() {
             }
         }
 
-        if (isMooving && IsKeyPressed(KEY_KP_4)) {
+        if (isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
             isDashAttacking = true;  
             currentAtkFrame = 0;
             elapsedTime = 0.0f;
             isMooving = false;  
             
         }
-        else if (!isMooving && IsKeyPressed(KEY_KP_4)) {
+        else if (!isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
             isAttacking = true;  
             currentAtkFrame = 0;
             elapsedTime = 0.0f;
@@ -233,21 +228,31 @@ void Player::Draw() {
     Vector2 origin = { 50.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
     Rectangle redRectangle = { rectangle.x, rectangle.y+20, rectangle.width -150, rectangle.height-20 }; 
-    int barWidth = 800;  
-    int barHeight = 50;  
-    int barX = 200;       
-    int barY = 0;       
+    int barWidth = 800;
+    int barHeight = 50;
+    int barX = 200;     
+    int barY = 50;
+
+    int barWidth2 = 10;
+    int barHeight2 = 50;
+    int barX2 = 200;
+    int barY2 = 0;
 
     
     DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
-    DrawRectangleRec(redRectangle, RED);
+
+    DrawRectangle(barX2, barY2, barWidth2, barHeight2, DARKGRAY);
+
+    DrawRectangle(barX2, barY2, (int)(barWidth2 * PlayerLife), barHeight2, GREEN);
+
+    //DrawRectangleRec(redRectangle, RED);
 
     if (Playerdash) {
-        DrawRectangle(barX, barY, (int)(barWidth * barProgress), barHeight, BLUE);
+        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, BLUE);
     }
     else
     {
-        DrawRectangle(barX, barY, (int)(barWidth * barProgress), barHeight, RED);
+        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, RED);
     }
     
 
@@ -281,7 +286,7 @@ void Player::Draw() {
         sourceRec.width = -runframes[currentRunFrame].width;
         DrawTexturePro(runframes[currentRunFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if(!isMooving && !isJumping){
+    else if(!isMooving && !isJumping && !isOnWall){
 
         if (lastDirection == LEFT) {
             sourceRec.width = -IdleFrames[currentIdleFrame].width;
@@ -291,7 +296,7 @@ void Player::Draw() {
         }
         DrawTexturePro(IdleFrames[currentIdleFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-    else if (isJumping) {
+    else if (isJumping && !isOnWall) {
         if (lastDirection == LEFT) {
             sourceRec.width = -jumpframes[currentJumpFrame].width;  
         }
@@ -300,6 +305,17 @@ void Player::Draw() {
         }
         DrawTexturePro(jumpframes[currentJumpFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }    
+
+    else if (isOnWall) {
+
+        if (lastDirection == LEFT) {
+            sourceRec.width = -Wallframes[currentWallFrame].width;
+        }
+        else {
+            sourceRec.width = Wallframes[currentWallFrame].width;
+        }
+        DrawTexturePro(Wallframes[currentWallFrame], sourceRec, destRec, origin, 0.0f, WHITE);
+    }
 }
 
 void Player::OnGroundCollision(const Rectangle& ground) {
@@ -322,8 +338,9 @@ void Player::OnWallCollision(const Rectangle& wall) {
 
         rectangle.x = wall.x - rectangle.width/2;
         if (IsKeyPressed(KEY_W) && Playerdash) {
-            rectangle.y -= 100.f;
-            barProgress -= 0.2f;
+            rectangle.y -= 150.0f;
+            rectangle.x -= 50.0f;
+            staminaProgress -= 0.2f;
         }
 
     }
@@ -332,15 +349,18 @@ void Player::OnWallCollision(const Rectangle& wall) {
 
         rectangle.x = wall.x + wall.width;
         if (IsKeyPressed(KEY_W) && Playerdash) {
-            rectangle.y -= 100.f;
-            barProgress -= 0.2f;
+            rectangle.y -= 150.f;
+            rectangle.x += 50.0f;
+            staminaProgress -= 0.2f;
         }
     }
     isOnWall = true;
 }
 
-
-
+void Player::OnspikesCollision(const Rectangle& ground) {
+    isOnSpike = true;
+    PlayerLife -= 0.1f;
+}
 
 
 

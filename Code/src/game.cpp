@@ -11,6 +11,7 @@ void Game::Init() {
     InitPlayer(); 
     InitGrounds();
     InitWalls();
+    InitSpikes();
 }
 
 void Game::InitPlayer() {
@@ -29,6 +30,12 @@ void Game::InitGrounds() {
 void Game::InitWalls() {
 
     walls.push_back({ 800, 100,200,400 });
+
+}
+
+void Game::InitSpikes() {
+
+    spikes.push_back({ 1100, 750,50,50 });
 
 }
 
@@ -51,13 +58,25 @@ void Game::Update() {
                                player->getRectangle().width - 150, player->getRectangle().height - 20 };
 
     bool isOnGroundNow = false; 
-
+    bool touchingspikes = false;
     for (const auto& ground : grounds) {
         {
             if (CheckCollisionRecs(redRectangle, ground)) {
                 if (redRectangle.y + redRectangle.width <= ground.y) {
                     isOnGroundNow = true;
                     player->OnGroundCollision(ground);
+                    break;
+                }
+            }
+        }
+    }
+
+    for (const auto& spikes : spikes) {
+        {
+            if (CheckCollisionY(redRectangle, spikes)) {
+                if (redRectangle.x + redRectangle.width > spikes.x && redRectangle.x < spikes.x + spikes.width) {
+                    touchingspikes = true;
+                    player->OnspikesCollision(spikes);
                     break;
                 }
             }
@@ -105,6 +124,10 @@ void Game::Draw() {
     ClearBackground(RAYWHITE);
     for (const auto& ground : grounds) {
         DrawRectangleRec(ground, DARKGRAY); 
+    }
+
+    for (const auto& spikes : spikes) {
+        DrawRectangleRec(spikes, RED);
     }
 
     for (const auto& walls : walls) {
