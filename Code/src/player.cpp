@@ -1,6 +1,9 @@
 #include "player.h"
 #include "iostream"
+#include "entity.h"
+#include "map.h"
 Player::Player(const Rectangle& rectangle) : Entity(rectangle), velocity{ 0.0f, 0.0f } {
+    entity = new Entity(rectangle);
     IdleFrames[0] = LoadTexture("Assets/Warrior/Individual Sprite/Idle/Warrior_Idle_1.png");
     IdleFrames[1] = LoadTexture("Assets/Warrior/Individual Sprite/Idle/Warrior_Idle_2.png");
     IdleFrames[2] = LoadTexture("Assets/Warrior/Individual Sprite/Idle/Warrior_Idle_3.png");
@@ -66,6 +69,8 @@ void Player::Init(float x, float y,float w, float h) {
 }
 
 void Player::Update() {
+    Entity::Update();
+
     if (staminaProgress >= 1.0f) {
         staminaProgress = 1.0f;  
         Playerdash = true;    
@@ -205,25 +210,58 @@ void Player::Update() {
                 currentIdleFrame = (currentIdleFrame + 1) % 6;
             }
         }
+        Attack();
+        DashAttack();
 
-        if (isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
-            isDashAttacking = true;  
-            currentAtkFrame = 0;
-            elapsedTime = 0.0f;
-            isMooving = false;  
-            
+        Rectangle redRectangle = { entity->getRectangle().x, entity->getRectangle().y + 20,
+                                   entity->getRectangle().width - 150, entity->getRectangle().height - 20 };
+        entity->setRectangle({ rectangle.x, rectangle.y, rectangle.width, rectangle.height });
+
+        bool touchingspikes = false;
+
+        for (const auto& spikes : spikes) {
+            {
+                if (CheckCollisionY(redRectangle, spikes)) {
+                    if (redRectangle.x + redRectangle.width > spikes.x && redRectangle.x < spikes.x + spikes.width) {
+                        touchingspikes = true;
+                        OnspikesCollision(spikes);
+                        break;
+                    }
+                }
+            }
         }
-        else if (!isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
-            isAttacking = true;  
-            currentAtkFrame = 0;
-            elapsedTime = 0.0f;
+
+        bool isOnWallNow = false;
+        for (const auto& wall : walls) {
+            if (CheckCollisionY(redRectangle, wall)) {
+                if (redRectangle.x + redRectangle.width > wall.x && redRectangle.x < wall.x + wall.width) {
+                    isOnWallNow = true;
+                    OnWallCollision(wall);
+                    break;
+                }
+            }
+        }
+
+        if (isOnWallNow) {
+            if (IsOnWall()) {
+                setOnWall(true);
+            }
+        }
+        else {
+            if (IsOnWall()) {
+                setOnWall(false);
+            }
         }
     }
 }
 
 
 
+
 void Player::Draw() {
+
+    entity->Draw();
+
     Rectangle sourceRec = { 0.0f, 0.0f, (float)Right.width, (float)Right.height };
     Vector2 origin = { 50.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
@@ -238,22 +276,7 @@ void Player::Draw() {
     int barX2 = 200;
     int barY2 = 0;
 
-    
-    DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
-
-    DrawRectangle(barX2, barY2, barWidth2, barHeight2, DARKGRAY);
-
-    DrawRectangle(barX2, barY2, (int)(barWidth2 * PlayerLife), barHeight2, GREEN);
-
-    //DrawRectangleRec(redRectangle, RED);
-
-    if (Playerdash) {
-        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, BLUE);
-    }
-    else
-    {
-        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, RED);
-    }
+    DrawRectangleRec(redRectangle, RED);
     
 
     if (isDashAttacking && !isJumping) {
@@ -316,27 +339,59 @@ void Player::Draw() {
         }
         DrawTexturePro(Wallframes[currentWallFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
+
+    DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
+
+    DrawRectangle(barX2, barY2, barWidth2, barHeight2, DARKGRAY);
+
+    DrawRectangle(barX2, barY2, (int)(barWidth2 * PlayerLife), barHeight2, GREEN);
+
+    if (Playerdash) {
+        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, BLUE);
+    }
+    else
+    {
+        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, RED);
+    }
 }
 
-void Player::OnGroundCollision(const Rectangle& ground) {
 
-    rectangle.y = ground.y - rectangle.height; 
-    verticalspeed = 0.0f;  
-    isOnGround = true;     
+
+void Player::setOnWall(bool state) {
+    isOnWall = state;
 }
 
+
+void Player::DashAttack() {
+    if (isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
+        isDashAttacking = true;
+        currentAtkFrame = 0;
+        elapsedTime = 0.0f;
+        isMooving = false;
+
+    }
+}
+
+void Player::Attack() {
+    if (!isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
+        isAttacking = true;
+        currentAtkFrame = 0;
+        elapsedTime = 0.0f;
+    }
+
+}
 void Player::OnWallCollision(const Rectangle& wall) {
 
 
     verticalspeed = 0.0f;
 
-    float overlapLeft = (rectangle.x + rectangle.width) - wall.x;  
-    float overlapRight = (wall.x + wall.width) - rectangle.x;      
+    float overlapLeft = (rectangle.x + rectangle.width) - wall.x;
+    float overlapRight = (wall.x + wall.width) - rectangle.x;
 
 
     if (overlapLeft > 0 && rectangle.x < wall.x) {
 
-        rectangle.x = wall.x - rectangle.width/2;
+        rectangle.x = wall.x - rectangle.width / 2;
         if (IsKeyPressed(KEY_W) && Playerdash) {
             rectangle.y -= 150.0f;
             rectangle.x -= 50.0f;
@@ -361,15 +416,3 @@ void Player::OnspikesCollision(const Rectangle& ground) {
     isOnSpike = true;
     PlayerLife -= 0.1f;
 }
-
-
-
-void Player::setOnGround(bool state) {
-    isOnGround = state;  
-}
-
-void Player::setOnWall(bool state) {
-    isOnWall = state;
-}
-
-

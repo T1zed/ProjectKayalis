@@ -20,10 +20,7 @@ private:
     Game() = default; 
     ~Game() = default; 
 
-    Player* player = nullptr; 
-    std::vector<Rectangle> grounds;
-    std::vector<Rectangle> walls;
-    std::vector<Rectangle> spikes;
+ 
     void InitPlayer();
     void InitGrounds();
     void InitWalls();

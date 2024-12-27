@@ -1,10 +1,12 @@
 #include "game.h"
-
+#include "map.h"
+#include "entity.h"
 Game& Game::GetInstance() {
     static Game instance;
     return instance;
 }
 
+Player* player = nullptr;
 void Game::Init() {
     InitWindow(2000, 1000, "Platformer");
     SetTargetFPS(100);
@@ -15,8 +17,8 @@ void Game::Init() {
 }
 
 void Game::InitPlayer() {
-    player = new Player(Rectangle{ 400, 300, 300, 200 });  
-    player->Init(400, 300, 300 ,200);
+    player = new Player(Rectangle{ 400, 300, 300, 200 });
+    player->Init(400, 300, 300, 200);
 }
 void Game::InitGrounds() {
 
@@ -49,79 +51,17 @@ bool Game::CheckCollisionY(const Rectangle& rect1, const Rectangle& rect2) {
 
 
 void Game::Update() {
-    if (player == nullptr) {
-        return;
+    if (player != nullptr) {
+        player->Update();  
     }
-
-    player->Update();
-    Rectangle redRectangle = { player->getRectangle().x, player->getRectangle().y + 20,
-                               player->getRectangle().width - 150, player->getRectangle().height - 20 };
-
-    bool isOnGroundNow = false; 
-    bool touchingspikes = false;
-    for (const auto& ground : grounds) {
-        {
-            if (CheckCollisionRecs(redRectangle, ground)) {
-                if (redRectangle.y + redRectangle.width <= ground.y) {
-                    isOnGroundNow = true;
-                    player->OnGroundCollision(ground);
-                    break;
-                }
-            }
-        }
-    }
-
-    for (const auto& spikes : spikes) {
-        {
-            if (CheckCollisionY(redRectangle, spikes)) {
-                if (redRectangle.x + redRectangle.width > spikes.x && redRectangle.x < spikes.x + spikes.width) {
-                    touchingspikes = true;
-                    player->OnspikesCollision(spikes);
-                    break;
-                }
-            }
-        }
-    }
-
-    bool isOnWallNow = false;
-
-    for (const auto& wall : walls) {
-        if (CheckCollisionY(redRectangle, wall)) {
-            if (redRectangle.x + redRectangle.width > wall.x && redRectangle.x < wall.x + wall.width) {  
-                isOnWallNow = true;
-                player->OnWallCollision(wall);  
-                break;
-            }
-        }
-    }
-
-    if (isOnWallNow) {
-        if (!player->IsOnWall()) {  
-            player->setOnWall(true);
-        }
-    }
-    else {
-        if (player->IsOnWall()) {
-            player->setOnWall(false);
-        }
-    }
-
-    if (isOnGroundNow) {
-        if (!player->IsOnGround()) {
-            player->setOnGround(true);
-        }
-    }
-    else {
-        if (player->IsOnGround()) {
-            player->setOnGround(false);
-        }
-    }
+   
 }
 
 
 void Game::Draw() {
     BeginDrawing();
     ClearBackground(RAYWHITE);
+
     for (const auto& ground : grounds) {
         DrawRectangleRec(ground, DARKGRAY); 
     }
@@ -135,14 +75,14 @@ void Game::Draw() {
     }
 
     if (player != nullptr) {
-        player->Draw(); 
+        player->Draw();
     }
     EndDrawing();
 }
 
 void Game::Close() {
     if (player != nullptr) {
-        delete player;  
+        delete player;
         player = nullptr;
     }
     CloseWindow(); 

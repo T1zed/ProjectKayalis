@@ -187,11 +187,13 @@ xcopy /y /d  "$(SolutionDir)Assets\*" "$(OutDir)Assets\"</Command>
     <ClCompile Include="Code\src\entity.cpp" />
     <ClCompile Include="Code\src\game.cpp" />
     <ClCompile Include="Code\src\main.cpp" />
+    <ClCompile Include="Code\src\map.cpp" />
     <ClCompile Include="Code\src\player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\include\entity.h" />
     <ClInclude Include="Code\include\game.h" />
+    <ClInclude Include="Code\include\map.h" />
     <ClInclude Include="Code\include\player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

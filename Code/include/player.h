@@ -11,10 +11,7 @@ public:
     void Init(float x, float y, float w, float h);
     void Update();
     void Draw();
-    void OnGroundCollision(const Rectangle& ground);
-    void ResetOnGround() { isOnGround = false; }
-    bool IsOnGround() const { return isOnGround; }
-    void setOnGround(bool state);
+    Entity* entity = nullptr;
 
 
     bool IsOnWall() const { return isOnWall; }
@@ -22,6 +19,8 @@ public:
 
     void OnWallCollision(const Rectangle& wall);
     void OnspikesCollision(const Rectangle& spikes);
+    void DashAttack();
+    void Attack();
 private:
     Texture2D Right;  
     Texture2D AttackFrames[12];
@@ -45,9 +44,7 @@ private:
 
     float staminaProgress = 1.0f;
     float PlayerLife = 100.0f;
-
-    float verticalspeed= 0.0f;
-    bool isOnGround = false;
+    
     bool isJumping = false;
     bool isDashing = false;
     bool isOnWall = false; 
