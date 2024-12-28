@@ -121,6 +121,10 @@ void Player::Update() {
         verticalspeed = 0.0f;
     }
 
+
+
+
+
     if (!isAttacking && !isDashAttacking && !isJumping)
         staminaProgress += 0.0008f;
 
@@ -210,6 +214,7 @@ void Player::Update() {
                 currentIdleFrame = (currentIdleFrame + 1) % 6;
             }
         }
+
         Attack();
         DashAttack();
 
@@ -266,15 +271,6 @@ void Player::Draw() {
     Vector2 origin = { 50.0f, 0.0f };
     Rectangle destRec = { rectangle.x, rectangle.y, rectangle.width, rectangle.height };
     Rectangle redRectangle = { rectangle.x, rectangle.y+20, rectangle.width -150, rectangle.height-20 }; 
-    int barWidth = 800;
-    int barHeight = 50;
-    int barX = 200;     
-    int barY = 50;
-
-    int barWidth2 = 10;
-    int barHeight2 = 50;
-    int barX2 = 200;
-    int barY2 = 0;
 
     DrawRectangleRec(redRectangle, RED);
     
@@ -339,20 +335,6 @@ void Player::Draw() {
         }
         DrawTexturePro(Wallframes[currentWallFrame], sourceRec, destRec, origin, 0.0f, WHITE);
     }
-
-    DrawRectangle(barX, barY, barWidth, barHeight, DARKGRAY);
-
-    DrawRectangle(barX2, barY2, barWidth2, barHeight2, DARKGRAY);
-
-    DrawRectangle(barX2, barY2, (int)(barWidth2 * PlayerLife), barHeight2, GREEN);
-
-    if (Playerdash) {
-        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, BLUE);
-    }
-    else
-    {
-        DrawRectangle(barX, barY, (int)(barWidth * staminaProgress), barHeight, RED);
-    }
 }
 
 
@@ -363,14 +345,36 @@ void Player::setOnWall(bool state) {
 
 
 void Player::DashAttack() {
-    if (isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
+
+    if (isMooving && IsKeyPressed(KEY_KP_4) && !isJumping && !isDashAttacking) {
         isDashAttacking = true;
         currentAtkFrame = 0;
         elapsedTime = 0.0f;
-        isMooving = false;
+        dashDuration = 100.0f;   
+        dashTime = 0.0f;      
+        if (lastDirection == LEFT)
+            DashSpeed = -2000.0f;  
+        else
+            DashSpeed = 2000.0f;   
+        isMooving = false;        
+    }
+    if (isDashAttacking) {
+        float deltaTime = GetFrameTime();  
+        dashTime += deltaTime;  
 
+        if (dashTime < dashDuration) {
+
+            rectangle.x += DashSpeed * deltaTime;
+
+        }
+        else {
+
+            isDashAttacking = false;
+        }
     }
 }
+
+
 
 void Player::Attack() {
     if (!isMooving && IsKeyPressed(KEY_KP_4) && !isJumping) {
@@ -382,35 +386,54 @@ void Player::Attack() {
 }
 void Player::OnWallCollision(const Rectangle& wall) {
 
-
     verticalspeed = 0.0f;
-
+    walljump = false;
     float overlapLeft = (rectangle.x + rectangle.width) - wall.x;
     float overlapRight = (wall.x + wall.width) - rectangle.x;
 
-
     if (overlapLeft > 0 && rectangle.x < wall.x) {
+        rectangle.x = wall.x - rectangle.width / 2 + 2;
 
-        rectangle.x = wall.x - rectangle.width / 2;
-        if (IsKeyPressed(KEY_W) && Playerdash) {
-            rectangle.y -= 150.0f;
-            rectangle.x -= 50.0f;
-            staminaProgress -= 0.2f;
+        if (IsKeyDown(KEY_W) && Playerdash && staminaProgress > 0.0f && !walljump) {
+            rectangle.y -= 100.0f * GetFrameTime();
+            staminaProgress -= 0.002f;
         }
-
+        else {
+            rectangle.y += 30.0f * GetFrameTime();  
+        }
     }
 
     else if (overlapRight > 0 && rectangle.x > wall.x) {
+        rectangle.x = wall.x + wall.width - 2;
 
-        rectangle.x = wall.x + wall.width;
-        if (IsKeyPressed(KEY_W) && Playerdash) {
-            rectangle.y -= 150.f;
-            rectangle.x += 50.0f;
-            staminaProgress -= 0.2f;
+        if (IsKeyDown(KEY_W) && Playerdash && staminaProgress > 0.0f) {
+            rectangle.y -= 100.0f * GetFrameTime();
+            staminaProgress -= 0.002f;
+        }
+        else {
+            rectangle.y += 30.0f * GetFrameTime();   
         }
     }
+
+    if (IsKeyDown(KEY_A) && rectangle.x < wall.x && Playerdash) {
+        rectangle.y -= 200.0f;
+        rectangle.x -= 100.0f;
+        staminaProgress -= 0.002f;
+    }
+
+    if (IsKeyDown(KEY_D) && rectangle.x > wall.x && Playerdash) {
+        rectangle.y -= 200.0f;
+        rectangle.x += 100.0f;
+        staminaProgress -= 0.002f;
+    }
+    
+
     isOnWall = true;
 }
+
+
+
+
 
 void Player::OnspikesCollision(const Rectangle& ground) {
     isOnSpike = true;

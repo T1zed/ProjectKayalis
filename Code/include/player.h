@@ -12,11 +12,11 @@ public:
     void Update();
     void Draw();
     Entity* entity = nullptr;
-
-
+    float GetStaminaProgress() const { return staminaProgress; }
+    float GetLife() const { return PlayerLife; }
     bool IsOnWall() const { return isOnWall; }
     void setOnWall(bool state);
-
+    bool IsDashing() const { return Playerdash; }
     void OnWallCollision(const Rectangle& wall);
     void OnspikesCollision(const Rectangle& spikes);
     void DashAttack();
@@ -57,7 +57,16 @@ private:
     bool isOnSpike = false;
     bool CanDash = false;
     bool Playerdash = true;
+    float DashSpeed = 0.0f;
+    float dashTime = 0.0f;
+    float dashDuration = 0.3f;
+    bool walljump = false;
 
+    bool isWallJumping = false;
+    float wallJumpDuration = 0.0f;
+    float wallJumpTimer = 0.0f;
+    float wallJumpSpeedX = 0.0f;
+    float wallJumpSpeedY = 0.0f;
 };
 
 

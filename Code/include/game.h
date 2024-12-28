@@ -16,11 +16,13 @@ public:
     void Close();
     bool CheckCollisionX(const Rectangle& rect1, const Rectangle& rect2);
     bool CheckCollisionY(const Rectangle& rect1, const Rectangle& rect2);
+
+    void UpdateCameraToFollow(const Rectangle& entity);
 private:
     Game() = default; 
     ~Game() = default; 
 
- 
+    Camera2D camera;
     void InitPlayer();
     void InitGrounds();
     void InitWalls();
